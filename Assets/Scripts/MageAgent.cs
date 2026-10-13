@@ -216,6 +216,21 @@ public sealed class MageAgent : MonoBehaviour
         bool foundMove = false;
         Vector2Int bestPosition = new Vector2Int(mage.GetX(), mage.GetY());
         float bestScore = float.NegativeInfinity;
+        int currentTargetDistance = GridDistance(mage, preferredTarget.piece);
+        int currentNearestEnemyDistance = GetNearestEnemyDistance(mage.GetX(), mage.GetY(), livingEnemies);
+        float currentScore;
+        if (retreat)
+        {
+            currentScore = currentNearestEnemyDistance * 1000f - currentTargetDistance * 10f;
+        }
+        else
+        {
+            currentScore = (currentTargetDistance <= spellRange ? 500f : 0f) - currentTargetDistance * 100f + currentNearestEnemyDistance;
+            if (currentNearestEnemyDistance <= dangerRange)
+            {
+                currentScore -= 1000f;
+            }
+        }
 
         for (int i = 0; i < MoveDirections.Length; i++)
         {
@@ -258,7 +273,7 @@ public sealed class MageAgent : MonoBehaviour
             }
         }
 
-        if (!foundMove)
+        if (!foundMove || bestScore <= currentScore)
         {
             return false;
         }
@@ -305,8 +320,12 @@ public sealed class MageAgent : MonoBehaviour
 
     private void OnValidate()
     {
-        minCoordinate = Mathf.Min(minCoordinate, maxCoordinate);
-        maxCoordinate = Mathf.Max(minCoordinate, maxCoordinate);
+        if (minCoordinate > maxCoordinate)
+        {
+            int oldMin = minCoordinate;
+            minCoordinate = maxCoordinate;
+            maxCoordinate = oldMin;
+        }
         spellRange = Mathf.Max(1, spellRange);
         dangerRange = Mathf.Max(0, dangerRange);
         spellDamage = Mathf.Max(1, spellDamage);
