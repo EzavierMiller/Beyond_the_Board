@@ -88,6 +88,8 @@ public sealed class MageAgent : MonoBehaviour
             return;
         }
 
+        BoardPiece[] boardPieces = FindObjectsByType<BoardPiece>(FindObjectsSortMode.None);
+
         EnemyTarget target = SelectTarget(livingEnemies);
         if (target == null)
         {
@@ -97,7 +99,7 @@ public sealed class MageAgent : MonoBehaviour
         bool threatTooClose = HasEnemyWithinDangerRange(livingEnemies);
         if (threatTooClose)
         {
-            if (TryMove(target, livingEnemies, true))
+            if (TryMove(target, livingEnemies, true, boardPieces))
             {
                 return;
             }
@@ -111,7 +113,7 @@ public sealed class MageAgent : MonoBehaviour
             return;
         }
 
-        if (!TryMove(target, livingEnemies, false))
+        if (!TryMove(target, livingEnemies, false, boardPieces))
         {
             Debug.Log("Mage waits: no legal adjacent tile improves its position.", this);
         }
@@ -120,14 +122,24 @@ public sealed class MageAgent : MonoBehaviour
     private List<EnemyTarget> GetLivingEnemies()
     {
         List<EnemyTarget> living = new List<EnemyTarget>();
-        for (int i = 0; i < enemies.Count; i++)
+        for (int i = enemies.Count - 1; i >= 0; i--)
         {
             EnemyTarget entry = enemies[i];
-            if (entry != null && entry.piece != null && entry.piece.gameObject.activeInHierarchy && entry.piece.health > 0)
+            if (entry == null || entry.piece == null)
             {
-                living.Add(entry);
+                enemies.RemoveAt(i);
+                continue;
             }
+
+            if (!entry.piece.gameObject.activeInHierarchy || entry.piece.health <= 0)
+            {
+                enemies.RemoveAt(i);
+                continue;
+            }
+
+            living.Add(entry);
         }
+
         return living;
     }
 
@@ -188,7 +200,7 @@ public sealed class MageAgent : MonoBehaviour
 
     private bool IsInSpellRange(BoardPiece target)
     {
-        // The current design has no terrain blockers, so every active enemy has line of sight.
+        // TODO: replace this placeholder with a board-based terrain/line-of-sight query once blocking tiles are introduced.
         return HasLineOfSight(target) && GridDistance(mage, target) <= spellRange;
     }
 
@@ -210,9 +222,8 @@ public sealed class MageAgent : MonoBehaviour
         }
     }
 
-    private bool TryMove(EnemyTarget preferredTarget, List<EnemyTarget> livingEnemies, bool retreat)
+    private bool TryMove(EnemyTarget preferredTarget, List<EnemyTarget> livingEnemies, bool retreat, BoardPiece[] boardPieces)
     {
-        BoardPiece[] boardPieces = FindObjectsByType<BoardPiece>(FindObjectsSortMode.None);
         bool foundMove = false;
         Vector2Int bestPosition = new Vector2Int(mage.GetX(), mage.GetY());
         float bestScore = float.NegativeInfinity;
@@ -221,10 +232,12 @@ public sealed class MageAgent : MonoBehaviour
         float currentScore;
         if (retreat)
         {
+            // Retreat if threatened: prioritize safe tiles, then improve the ability to keep pressure on the target.
             currentScore = currentNearestEnemyDistance * 1000f - currentTargetDistance * 10f;
         }
         else
         {
+            // Prefer tiles that keep the preferred target in range while avoiding danger zones.
             currentScore = (currentTargetDistance <= spellRange ? 500f : 0f) - currentTargetDistance * 100f + currentNearestEnemyDistance;
             if (currentNearestEnemyDistance <= dangerRange)
             {
