@@ -21,7 +21,7 @@
 
 ## Test it in Unity
 
-Open `Assets/Test.unity` on the `julian/mage-agent` branch and press Play. The scene's Mage acts automatically every second. The console reports movement and casts. Default values are spell range 4, danger radius 1, and spell damage 3; change them on MageAgent in the Inspector.
+Open `Assets/Test.unity` on the `Mage_AI` branch and press Play. The scene's Mage acts automatically every second. The console reports movement and casts. Default values are spell range 4, danger radius 1, and spell damage 3; change them on MageAgent in the Inspector.
 
 To test target priority or retreat, add another BoardPiece to the scene, include it in MageAgent's Enemies list, and assign its role. Put an enemy within one tile of the Mage to see retreat behavior. Call the public `TakeTurn` method from a turn manager or UnityEvent to disable automatic timing and integrate turn-by-turn play.
 
