@@ -3,6 +3,7 @@ using UnityEngine;
 public class Healer_AI : BoardPiece
 {
     public int healAmount = 2;
+    public int range = 2;
     public int maxHealth = 10;
     public BoardPiece[] allAllies;
 
@@ -38,7 +39,38 @@ public class Healer_AI : BoardPiece
 
         if (weakest != null)
         {
-            weakest.health += healAmount;
+            int distance = Math.abs(weakest.GetX() - xLoc) + Math.abs(weakest.GetY() - yLoc);
+
+            if (distance <= 1)
+            {
+                weakest.health += healAmount;
+            }
+
+            else
+            {
+                int targetX = xLoc;
+                int targetY = yLoc;
+
+                if (weakest.GetX() < xLoc)
+                {
+                    xLoc--;
+                }
+                if (weakest.Getx() > xLoc)
+                {
+                    xLoc++;
+                }
+
+                if (weakest.Gety() < yLoc)
+                {
+                    yLoc--;
+                }
+                if (weakest.GetY() > yLoc)
+                {
+                    yLoc++;
+                }
+
+                move(targetX, targetY);
+            }
         }
     }
 }
