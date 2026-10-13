@@ -39,7 +39,7 @@ public class Healer_AI : BoardPiece
 
         if (weakest != null)
         {
-            int distance = Math.abs(weakest.GetX() - xLoc) + Math.abs(weakest.GetY() - yLoc);
+            int distance = Mathf.Abs(weakest.GetX() - xLoc) + Mathf.Abs(weakest.GetY() - yLoc);
 
             if (distance <= 1)
             {
@@ -55,12 +55,12 @@ public class Healer_AI : BoardPiece
                 {
                     xLoc--;
                 }
-                if (weakest.Getx() > xLoc)
+                if (weakest.GetX() > xLoc)
                 {
                     xLoc++;
                 }
 
-                if (weakest.Gety() < yLoc)
+                if (weakest.GetY() < yLoc)
                 {
                     yLoc--;
                 }
@@ -69,7 +69,7 @@ public class Healer_AI : BoardPiece
                     yLoc++;
                 }
 
-                move(targetX, targetY);
+                Move(targetX, targetY);
             }
         }
     }
