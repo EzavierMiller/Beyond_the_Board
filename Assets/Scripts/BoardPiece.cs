@@ -1,8 +1,9 @@
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 //base class that each piece can inherit from
-public class BoardPiece : MonoBehaviour
+public abstract class BoardPiece : MonoBehaviour
 {
     public enum PieceControl
     {
@@ -34,34 +35,23 @@ public class BoardPiece : MonoBehaviour
     void Update()
     {
         //update position
-        rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
+        if(rect)
+            rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
 
-        //player controls for testing
-        if (control == PieceControl.Player)
-        {
-            if (Keyboard.current.aKey.wasPressedThisFrame)
-            {
-                xLoc--;
-            }
-            if (Keyboard.current.dKey.wasPressedThisFrame)
-            {
-                xLoc++;
-            }
-            if (Keyboard.current.wKey.wasPressedThisFrame)
-            {
-                yLoc--;
-            }
-            if (Keyboard.current.sKey.wasPressedThisFrame)
-            {
-                yLoc++;
-            }
-        }
+
+        Logic();
 
         //always keep pieces within board
         xLoc = Mathf.Clamp(xLoc, 1, 8);
         yLoc = Mathf.Clamp(yLoc, 1, 8);
-    }
 
+
+    }
+    public abstract void Logic();
+    public virtual void Attack(BoardPiece target)
+    {
+        target.health -= dmg;
+    }
     public void Move(int x, int y)
     {
         //yeah
@@ -70,7 +60,7 @@ public class BoardPiece : MonoBehaviour
     }
     public int GetX() { return xLoc; }
     public int GetY() { return yLoc; }
-    public void Advance()
+    public virtual void Advance()
     {
         //moves this piece in any direction
         int tempX = xLoc;
