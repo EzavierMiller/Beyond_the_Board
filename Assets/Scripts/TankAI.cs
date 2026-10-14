@@ -36,11 +36,9 @@ public class TankAI : BoardPiece
             return;
 
         // Find the square between the idenified weak ally
-        int blockX = weakestAlly.GetX()
-            + System.Math.Sign(nearestEnemy.GetX() - weakestAlly.GetX());
+        int blockX = weakestAlly.GetX() + System.Math.Sign(nearestEnemy.GetX() - weakestAlly.GetX());
 
-        int blockY = weakestAlly.GetY()
-            + System.Math.Sign(nearestEnemy.GetY() - weakestAlly.GetY());
+        int blockY = weakestAlly.GetY() + System.Math.Sign(nearestEnemy.GetY() - weakestAlly.GetY());
 
         // Only move if the square in front of the piece is empty
         if (IsSquareEmpty(blockX, blockY))
@@ -99,8 +97,7 @@ public class TankAI : BoardPiece
                 continue;
 
             int distance =
-                Mathf.Abs(piece.GetX() - ally.GetX()) +
-                Mathf.Abs(piece.GetY() - ally.GetY());
+                Mathf.Abs(piece.GetX() - ally.GetX()) + Mathf.Abs(piece.GetY() - ally.GetY());
 
             if (distance < shortestDistance)
             {
@@ -136,22 +133,22 @@ public class TankAI : BoardPiece
     bool IsAllyBehindTank(BoardPiece ally, BoardPiece attacker)
     {
         //Melee Attack
-    if (ally == null || attacker == null)
+        if (ally == null || attacker == null)
         return false;
 
-    // The attacker, tank, and ally must be in a straight line.
-    int dx1 = xLoc - attacker.GetX();
-    int dy1 = yLoc - attacker.GetY();
+    
+        int dx1 = xLoc - attacker.GetX();
+        int dy1 = yLoc - attacker.GetY();
 
-    int dx2 = ally.GetX() - xLoc;
-    int dy2 = ally.GetY() - yLoc;
+        int dx2 = ally.GetX() - xLoc;
+        int dy2 = ally.GetY() - yLoc;
 
-    // Require the ally to be behind the tank, relative to the attacker.
-    if (dx1 * dy2 != dy1 * dx2)
+    
+        if (dx1 * dy2 != dy1 * dx2)
         return false;
 
-    // Both segments must point in the same direction
-    return dx1 * dx2 + dy1 * dy2 > 0;
+    
+        return dx1 * dx2 + dy1 * dy2 > 0;
     }
 
 
