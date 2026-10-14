@@ -3113,8 +3113,9 @@ GameObject:
   m_Component:
   - component: {fileID: 607964081}
   - component: {fileID: 607964082}
+  - component: {fileID: 1887443921}
   m_Layer: 5
-  m_Name: PlayerPiece
+  m_Name: Mage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3154,7 +3155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoardPiece
   health: 10
   dmg: 1
-  control: 1
+  control: 0
   targetPiece: {fileID: 0}
   xLoc: 4
   yLoc: 8
@@ -8058,3 +8059,27 @@ SceneRoots:
   - {fileID: 1201520859}
   - {fileID: 1969694691}
   - {fileID: 2112928812}
+
+--- !u!114 &1887443921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607964080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14d225d1d7548d893c1f58ab00d3c40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MageAgent
+  mage: {fileID: 607964082}
+  enemies:
+  - piece: {fileID: 428085782}
+    role: 1
+  spellRange: 4
+  dangerRange: 1
+  spellDamage: 3
+  decisionInterval: 1
+  autoAct: 1
+  minCoordinate: 1
+  maxCoordinate: 8
