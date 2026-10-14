@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public List<BoardPiece> pieces;
@@ -22,5 +23,9 @@ public class GameManager : MonoBehaviour
         {
             piece.Advance();
         }
+    }
+    public void Restart()
+    {
+        SceneManager.LoadScene(0);
     }
 }
