@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections.Generic;
 
+[Serializable]
 //base class that each piece can inherit from
 public abstract class BoardPiece : MonoBehaviour
 {
@@ -55,8 +58,9 @@ public abstract class BoardPiece : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        AllPieces = GameManager.instance.pieces;
         //update position
-        if(rect)
+        if (rect)
             rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
 
 
@@ -68,11 +72,33 @@ public abstract class BoardPiece : MonoBehaviour
 
 
     }
-    public abstract void Logic();
-    public virtual void Attack(BoardPiece target)
+    public bool CanMove(int x, int y)
     {
-        target.health -= dmg;
+        bool result = true;
+        foreach (var piece in GameManager.instance.pieces) 
+        {
+            if ((piece.xLoc == x && piece.yLoc == y) || (GameManager.instance.player.xLoc == x && GameManager.instance.player.yLoc == y))
+            {
+                if(piece != this)
+                {
+                    result = false; break;
+                }
+            }
+        }
+
+        return result;
     }
+    public abstract void Logic();
+    public virtual void Attack(BoardPiece enemy)
+    {
+        enemy.health -= dmg;
+
+        if (enemy.health <= 0)
+        {
+            Destroy(enemy.gameObject);
+        }
+    }
+
     public void Move(int x, int y)
     {
         //yeah

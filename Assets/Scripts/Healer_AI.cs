@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Healer_AI : BoardPiece
@@ -5,17 +6,18 @@ public class Healer_AI : BoardPiece
     public int healAmount = 2;
     public int range = 2;
     public int maxHealth = 10;
-    public BoardPiece[] allAllies;
+    public List<BoardPiece> allAllies;
 
-    void Update()
+    public override void Logic()
     {
+        allAllies = GameManager.instance.pieces;
         if (control == PieceControl.AI)
         {
-            reflexAction();
+            //reflexAction();
         }
     }
 
-    private void reflexAction()
+    public override void Advance()
     {
         BoardPiece weakest = null;
         int lowest = int.MaxValue;
@@ -53,23 +55,24 @@ public class Healer_AI : BoardPiece
 
                 if (weakest.GetX() < xLoc)
                 {
-                    xLoc--;
+                    targetX--;
                 }
                 if (weakest.GetX() > xLoc)
                 {
-                    xLoc++;
+                    targetX++;
                 }
 
                 if (weakest.GetY() < yLoc)
                 {
-                    yLoc--;
+                    targetY--;
                 }
                 if (weakest.GetY() > yLoc)
                 {
-                    yLoc++;
+                    targetY++;
                 }
 
-                Move(targetX, targetY);
+                if(CanMove(targetX, targetY)) 
+                    Move(targetX, targetY);
             }
         }
     }

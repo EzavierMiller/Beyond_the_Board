@@ -48,7 +48,7 @@ public class RangerPiece : BoardPiece
                             tempX = Mathf.Clamp(--xLoc, 1, 8);
                             break;
                         }
-                        if (xLoc == 8)
+                        if (xLoc == 8 )
                         {
                             tempX = Mathf.Clamp(--xLoc, 1, 8);
                             break;

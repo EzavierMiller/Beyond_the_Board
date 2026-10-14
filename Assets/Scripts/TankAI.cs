@@ -5,8 +5,32 @@ public class TankAI : BoardPiece
 {
    //Tank Ai 
     public BoardPiece protectedPiece;
+    public BoardPiece weakestAlly;
+    public BoardPiece nearestEnemy;
+
+    public override void Logic()
+    {              
+        // Find the weakest ally nearby  
+        weakestAlly = FindWeakestAlly();
+        if (weakestAlly == null)
+        {
+            protectedPiece = null;
+            return;
+        }
+
+        protectedPiece = weakestAlly;
 
 
+
+
+
+        // Find an enemy threatening the ally
+        nearestEnemy = FindNearestEnemy(weakestAlly);
+
+        if (nearestEnemy == null)
+            return;
+
+    }
     //Assigning the tank piece's stats
     private void Awake()
     {
@@ -16,40 +40,28 @@ public class TankAI : BoardPiece
 
 
     // Called when it is the AI's turn
-    public void TakeTurn()
+    public override void Advance()
     {
-        // Find the weakest ally nearby
-        BoardPiece weakestAlly = FindWeakestAlly();
-
-        if (weakestAlly == null)
-        {
-            protectedPiece = null;
-            return;
-        }
-
-        protectedPiece = weakestAlly;
-
-        // Find an enemy threatening the ally
-        BoardPiece nearestEnemy = FindNearestEnemy(weakestAlly);
-
-        if (nearestEnemy == null)
-            return;
 
         // Find the square between the idenified weak ally
-        int blockX = weakestAlly.GetX() + System.Math.Sign(nearestEnemy.GetX() - weakestAlly.GetX());
-
-        int blockY = weakestAlly.GetY() + System.Math.Sign(nearestEnemy.GetY() - weakestAlly.GetY());
-
-        // Only move if the square in front of the piece is empty
-        if (IsSquareEmpty(blockX, blockY))
+        if (weakestAlly && weakestAlly)
         {
-            // Move one square toward the defensive position
-            int nextX = xLoc + System.Math.Sign(blockX - xLoc);
-            int nextY = yLoc + System.Math.Sign(blockY - yLoc);
+            int blockX = weakestAlly.GetX() + System.Math.Sign(nearestEnemy.GetX() - weakestAlly.GetX());
 
-            if (IsSquareEmpty(nextX, nextY))
+            int blockY = weakestAlly.GetY() + System.Math.Sign(nearestEnemy.GetY() - weakestAlly.GetY());
+
+            // Only move if the square in front of the piece is empty
+            if (IsSquareEmpty(blockX, blockY))
             {
-                Move(nextX, nextY);
+                // Move one square toward the defensive position
+                int nextX = xLoc + System.Math.Sign(blockX - xLoc);
+                int nextY = yLoc + System.Math.Sign(blockY - yLoc);
+
+                if (IsSquareEmpty(nextX, nextY))
+                {
+                    if (CanMove(nextX, nextY))
+                        Move(nextX, nextY);
+                }
             }
         }
     }
@@ -71,7 +83,7 @@ public class TankAI : BoardPiece
             int distanceX = Mathf.Abs(piece.GetX() - xLoc);
             int distanceY = Mathf.Abs(piece.GetY() - yLoc);
 
-            if (distanceX > 1 || distanceY > 1)
+            if (distanceX > 2 || distanceY > 2)
                 continue;
 
             if (weakest == null || piece.health < weakest.health)

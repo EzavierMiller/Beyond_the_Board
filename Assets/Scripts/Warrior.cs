@@ -6,7 +6,11 @@ public class Warrior : BoardPiece
     
     private BoardPiece currentTarget = null;
 
-    void Update()
+    public override void Logic()
+    {
+
+    }
+    public override void Advance()
     {
         if (control == PieceControl.AI)
         {
@@ -69,16 +73,8 @@ public class Warrior : BoardPiece
             targetY += (target.GetY() > yLoc) ? 1 : -1;
         }
 
-        Move(targetX, targetY);
+        if(CanMove(targetX,targetY)) 
+            Move(targetX, targetY);
     }
 
-    private void Attack(BoardPiece enemy)
-    {
-        enemy.health -= dmg;
-
-        if (enemy.health <= 0)
-        {
-            Destroy(enemy.gameObject);
-        }
-    }
 }
