@@ -1,10 +1,31 @@
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 //base class that each piece can inherit from
 public abstract class BoardPiece : MonoBehaviour
 {
+    //What I added//
+    public static List<BoardPiece> AllPieces = new List<BoardPiece>();
+
+    protected virtual void OnEnable()
+    {
+    if (!AllPieces.Contains(this))
+
+    {
+        AllPieces.Add(this);
+    }
+    }
+
+    protected virtual void OnDisable()
+    {
+        AllPieces.Remove(this);
+    }
+    //
+
+
+
     public enum PieceControl
     {
         None,
