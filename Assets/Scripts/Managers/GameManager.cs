@@ -48,7 +48,20 @@ public class GameManager : MonoBehaviour
     // Board Communication; removes pieces from the board if they are captured (is in the captured LIST or ARRAY).
     void ApplyAndCheckCaptures()
     {
-        throw new NotImplementedException();
+        currBoard = GetBoard();
+
+        foreach (List<BoardPiece> capturedLists in currBoard.capturedEachTeam.Values)
+        {
+            for (int i = pieces.Count - 1; i >= 0; i--)
+            {
+                if (capturedLists.Contains(pieces[i]))
+                {
+                    BoardPiece capturedPiece = pieces[i];
+                    pieces.RemoveAt(i);
+                    Destroy(capturedPiece.gameObject);
+                }
+            }
+        }
     }
 
     // Removes the current piece from the team.

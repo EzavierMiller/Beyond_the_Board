@@ -7,6 +7,8 @@ public class Board
 {
     private readonly Team[,] localView;
 
+    public readonly Dictionary<Team, List<BoardPiece>> capturedEachTeam = new Dictionary<Team, List<BoardPiece>>();
+
     public int Width => localView.GetLength(0);
     public int Height => localView.GetLength(1);
 
@@ -37,7 +39,15 @@ public class Board
     // Adds the piece to a list of captured pieces, a list per faction.
     void AddCapture(BoardPiece agent, Team captors)
     {
-        throw new NotImplementedException();
+        if (!capturedEachTeam.ContainsKey(captors))
+        {
+            capturedEachTeam[captors] = new List<BoardPiece>();
+        }
+
+        if (capturedEachTeam[captors].Contains(agent))
+        {
+            capturedEachTeam[captors].Add(agent);
+        }
     }
 
     // Returns if a piece can exist in this spot on the board.
