@@ -33,7 +33,8 @@ public class Board
     // Team Management
     void SetTeam(BoardPiece agent, Team team)
     {
-        throw new NotImplementedException();
+        BoardPos pos = agent.GetPos();
+        localView[pos.X, pos.Y] = team;
     }
 
     // Adds the piece to a list of captured pieces, a list per faction.
@@ -51,9 +52,9 @@ public class Board
     }
 
     // Returns if a piece can exist in this spot on the board.
-    bool IsLegal(BoardPos cmd)
+    public bool IsLegal(BoardPos cmd)
     {
-        throw new NotImplementedException();
+        return cmd.X >= 0 && cmd.X < Width && cmd.Y >= 0 && cmd.Y < Height && localView[cmd.X, cmd.Y] == Team.None;
     }
 
     // Adds a space to the board.

@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour
     // Removes the current piece from the team.
     void UnregisterAgent(BoardPiece agent)
     {
-        throw new NotImplementedException();
+        pieces.Remove(agent);
     }
 
     // Board Communication between the pieces. Manage phases and turns.
