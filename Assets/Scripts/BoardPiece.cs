@@ -5,7 +5,7 @@ using System.Collections.Generic;
 //base class that each piece can inherit from
 public class BoardPiece : MonoBehaviour
 {
-    //What I added//
+    
     public static List<BoardPiece> AllPieces = new List<BoardPiece>();
 
     protected virtual void OnEnable()
@@ -21,7 +21,7 @@ public class BoardPiece : MonoBehaviour
     {
         AllPieces.Remove(this);
     }
-    //
+    
 
 
 
