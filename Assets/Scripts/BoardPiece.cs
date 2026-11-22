@@ -27,21 +27,19 @@ public abstract class BoardPiece : MonoBehaviour
     }
     //
 
-
-
-    public enum PieceControl
+    public BoardPos GetPos()
     {
-        None,
-        Player,
-        AI
+        return (GetX()-1, GetY()-1, control);
     }
+
+
 
     [Header("Piece Stats")]
     public int health = 10;
     public int dmg = 1;
 
     [Header("Piece Settings")]
-    public PieceControl control = PieceControl.None;
+    public Team control = Team.None;
     public BoardPiece targetPiece = null;
     public int xLoc = 0;
     public int yLoc = 0;

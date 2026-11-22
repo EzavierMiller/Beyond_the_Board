@@ -11,7 +11,7 @@ public class Healer_AI : BoardPiece
     public override void Logic()
     {
         allAllies = GameManager.instance.pieces;
-        if (control == PieceControl.AI)
+        if (control == Team.AI)
         {
             //reflexAction();
         }

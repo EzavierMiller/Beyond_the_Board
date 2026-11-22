@@ -12,7 +12,7 @@ public class Warrior : BoardPiece
     }
     public override void Advance()
     {
-        if (control == PieceControl.AI)
+        if (control == Team.AI)
         {
             Action();
         }
@@ -46,7 +46,7 @@ public class Warrior : BoardPiece
 
         foreach (BoardPiece piece in all)
         {
-            if (piece == this || piece.control == this.control || piece.control == PieceControl.None)
+            if (piece == this || piece.control == this.control || piece.control == Team.None)
                 continue;
 
             float dist = Vector2.Distance(new Vector2(xLoc, yLoc), new Vector2(piece.GetX(), piece.GetY()));

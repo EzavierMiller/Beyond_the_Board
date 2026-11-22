@@ -5,7 +5,7 @@ public class PlayerPiece : BoardPiece
     public override void Logic()
     {
         //player controls for testing
-        if (control == PieceControl.Player)
+        if (control == Team.Player)
         {
             if (Keyboard.current.aKey.wasPressedThisFrame)
             {
