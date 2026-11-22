@@ -1,22 +1,45 @@
+using System;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[Serializable]
 //base class that each piece can inherit from
-public class BoardPiece : MonoBehaviour
+public abstract class BoardPiece : MonoBehaviour
 {
-    public enum PieceControl
+    //What I added//
+    public static List<BoardPiece> AllPieces = new List<BoardPiece>();
+
+    protected virtual void OnEnable()
     {
-        None,
-        Player,
-        AI
+    if (!AllPieces.Contains(this))
+
+    {
+        AllPieces.Add(this);
     }
+    }
+
+    protected virtual void OnDisable()
+    {
+        AllPieces.Remove(this);
+    }
+    //
+
+    public BoardPos GetPos()
+    {
+        return (GetX()-1, GetY()-1, control);
+    }
+
+
 
     [Header("Piece Stats")]
     public int health = 10;
     public int dmg = 1;
 
     [Header("Piece Settings")]
-    public PieceControl control = PieceControl.None;
+    public Team control = Team.None;
     public BoardPiece targetPiece = null;
     public int xLoc = 0;
     public int yLoc = 0;
@@ -33,33 +56,45 @@ public class BoardPiece : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        AllPieces = GameManager.instance.pieces;
         //update position
-        rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
+        if (rect)
+            rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
 
-        //player controls for testing
-        if (control == PieceControl.Player)
-        {
-            if (Keyboard.current.aKey.wasPressedThisFrame)
-            {
-                xLoc--;
-            }
-            if (Keyboard.current.dKey.wasPressedThisFrame)
-            {
-                xLoc++;
-            }
-            if (Keyboard.current.wKey.wasPressedThisFrame)
-            {
-                yLoc--;
-            }
-            if (Keyboard.current.sKey.wasPressedThisFrame)
-            {
-                yLoc++;
-            }
-        }
+
+        Logic();
 
         //always keep pieces within board
         xLoc = Mathf.Clamp(xLoc, 1, 8);
         yLoc = Mathf.Clamp(yLoc, 1, 8);
+
+
+    }
+    public bool CanMove(int x, int y)
+    {
+        bool result = true;
+        foreach (var piece in GameManager.instance.pieces) 
+        {
+            if ((piece.xLoc == x && piece.yLoc == y) || (GameManager.instance.player.xLoc == x && GameManager.instance.player.yLoc == y))
+            {
+                if(piece != this)
+                {
+                    result = false; break;
+                }
+            }
+        }
+
+        return result;
+    }
+    public abstract void Logic();
+    public virtual void Attack(BoardPiece enemy)
+    {
+        enemy.health -= dmg;
+
+        if (enemy.health <= 0)
+        {
+            Destroy(enemy.gameObject);
+        }
     }
 
     public void Move(int x, int y)
@@ -70,7 +105,7 @@ public class BoardPiece : MonoBehaviour
     }
     public int GetX() { return xLoc; }
     public int GetY() { return yLoc; }
-    public void Advance()
+    public virtual void Advance()
     {
         //moves this piece in any direction
         int tempX = xLoc;
