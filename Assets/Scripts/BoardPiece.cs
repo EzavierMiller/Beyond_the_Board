@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 [Serializable]
 //base class that each piece can inherit from
-public abstract class BoardPiece : MonoBehaviour
+public class BoardPiece : MonoBehaviour
 {
     //What I added//
     public static List<BoardPiece> AllPieces = new List<BoardPiece>();
@@ -46,6 +46,8 @@ public abstract class BoardPiece : MonoBehaviour
 
     private RectTransform rect;
     private int unitSize = 25;
+    [SerializeField] private string pieceId;
+    public string PieceId => string.IsNullOrEmpty(pieceId) ? GetEntityId().ToString() : pieceId;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -56,50 +58,44 @@ public abstract class BoardPiece : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        AllPieces = GameManager.instance.pieces;
-        //update position
-        if (rect)
-            rect.anchoredPosition = new Vector2((xLoc-1) * unitSize, -1*((yLoc-1) * unitSize));
-
-
-        Logic();
-
-        //always keep pieces within board
+        if (rect != null)
+            rect.anchoredPosition = new Vector2((xLoc - 1) * unitSize, -((yLoc - 1) * unitSize));
+        if (Manager == null) Logic();
         xLoc = Mathf.Clamp(xLoc, 1, 8);
         yLoc = Mathf.Clamp(yLoc, 1, 8);
-
-
     }
+
+    public GameManager Manager => GameManager.instance != null &&
+        GameManager.instance.gameObject.scene == gameObject.scene &&
+        GameManager.instance.pieces.Contains(this) ? GameManager.instance : null;
+
     public bool CanMove(int x, int y)
     {
-        bool result = true;
-        foreach (var piece in GameManager.instance.pieces) 
-        {
-            if ((piece.xLoc == x && piece.yLoc == y) || (GameManager.instance.player.xLoc == x && GameManager.instance.player.yLoc == y))
-            {
-                if(piece != this)
-                {
-                    result = false; break;
-                }
-            }
-        }
-
-        return result;
+        if (x < 1 || x > 8 || y < 1 || y > 8) return false;
+        if (Manager != null) return Manager.GetBoard().IsLegal(new BoardPos(x - 1, y - 1, Team.None));
+        foreach (BoardPiece piece in AllPieces)
+            if (piece != null && piece != this && piece.gameObject.activeInHierarchy && piece.health > 0 &&
+                piece.xLoc == x && piece.yLoc == y) return false;
+        return true;
     }
-    public abstract void Logic();
+    public virtual void Logic() { }
     public virtual void Attack(BoardPiece enemy)
     {
-        enemy.health -= dmg;
-
-        if (enemy.health <= 0)
+        if (enemy == null || enemy.health <= 0 || enemy.control == control) return;
+        if (Manager != null) { Manager.TryDamage(this, enemy, dmg); return; }
+        enemy.health = Mathf.Max(0, enemy.health - dmg);
+        if (enemy.health == 0)
         {
+            PieceMoraleAgent.PublishCapture(new CaptureEvent(0, enemy, control));
+            enemy.gameObject.SetActive(false);
             Destroy(enemy.gameObject);
         }
     }
 
     public void Move(int x, int y)
     {
-        //yeah
+        if (Manager != null) { Manager.TryMove(this, x, y); return; }
+        if (!CanMove(x, y)) return;
         xLoc = x;
         yLoc = y;
     }
@@ -107,33 +103,10 @@ public abstract class BoardPiece : MonoBehaviour
     public int GetY() { return yLoc; }
     public virtual void Advance()
     {
-        //moves this piece in any direction
-        int tempX = xLoc;
-        int tempY = yLoc;
-
-        if (targetPiece != null) {
-            if (targetPiece.GetY() > yLoc)
-            {
-                tempY = Mathf.Clamp(++yLoc, 1, 8);
-            }
-
-            if (targetPiece.GetY() < yLoc)
-            {
-                tempY = Mathf.Clamp(--yLoc, 1, 8);
-            }
-
-            if (targetPiece.GetX() > xLoc)
-            {
-                tempX = Mathf.Clamp(++xLoc, 1, 8);
-            }
-
-            if (targetPiece.GetX() < xLoc)
-            {
-                tempX = Mathf.Clamp(--xLoc, 1, 8);
-            }
-
-            Move(tempX, tempY);
-        }
-
+        if (Manager != null && !Manager.IsDispatching) { Manager.IssueOrder(this); return; }
+        if (targetPiece == null) return;
+        int nextX = xLoc + System.Math.Sign(targetPiece.GetX() - xLoc);
+        int nextY = yLoc + System.Math.Sign(targetPiece.GetY() - yLoc);
+        Move(nextX, nextY);
     }
 }

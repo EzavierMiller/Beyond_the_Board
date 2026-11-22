@@ -16,24 +16,45 @@ public class PieceMoraleAgent : MonoBehaviour
     [SerializeField, Range(0, 100)] private int manicThreshold = 25;
     [SerializeField, Min(0)] private int moraleLostWhenAllyIsCaptured = 10;
     [SerializeField, Min(0)] private int moraleGainedWhenEnemyIsCaptured = 5;
+    [Serializable]
+    private sealed class CaptureWeight
+    {
+        public string capturedType;
+        [Min(0)] public int allyLost;
+        [Min(0)] public int enemyTaken;
+    }
+    [SerializeField] private CaptureWeight[] captureWeights = Array.Empty<CaptureWeight>();
 
     private BoardPiece piece;
+    private MageAgent mageAgent;
     private bool refuseNextCommand;
+    private bool isRogue;
+    private bool captureNotified;
 
     public int Morale => morale;
-    public bool IsRogue => morale < rogueThreshold;
+    public bool IsRogue => isRogue;
     public bool RefuseNextCommand => refuseNextCommand;
 
     private void Awake()
     {
         piece = GetComponent<BoardPiece>();
+        mageAgent = GetComponent<MageAgent>();
+        isRogue = morale < rogueThreshold;
         if (piece == null)
         {
             Debug.LogError("PieceMoraleAgent requires a BoardPiece on the same GameObject.", this);
         }
     }
 
-    // Morale changes are broadcast when a piece is captured/destroyed.
+    public void SetRefusal() => refuseNextCommand = true;
+    public bool ConsumeRefusal()
+    {
+        if (!refuseNextCommand) return false;
+        refuseNextCommand = false;
+        Debug.Log($"piece={piece.name} response=refuse morale={morale}", this);
+        return true;
+    }
+
     private void OnEnable()
     {
         PieceDestroyed += HandlePieceDestroyed;
@@ -44,7 +65,7 @@ public class PieceMoraleAgent : MonoBehaviour
         PieceDestroyed -= HandlePieceDestroyed;
     }
 
-    private static event Action<Team> PieceDestroyed;
+    private static event Action<CaptureEvent> PieceDestroyed;
 
     /// <summary>
     /// Returns a random legal adjacent tile for a manic move, or Wait if none is free.
@@ -90,7 +111,7 @@ public class PieceMoraleAgent : MonoBehaviour
     /// <summary>Chooses a rogue action from the current morale thresholds.</summary>
     public RequestAction DecideRogueAction(Board board, BoardPos[] reservedTiles)
     {
-        if (morale >= rogueThreshold)
+        if (!IsRogue)
         {
             return new RequestAction(RequestActionType.None);
         }
@@ -114,25 +135,17 @@ public class PieceMoraleAgent : MonoBehaviour
     /// </summary>
     public void ChooseAction()
     {
-        if (piece == null || !piece.gameObject.activeInHierarchy || piece.health <= 0)
+        if (piece == null || !piece.gameObject.activeInHierarchy || piece.health <= 0) return;
+        if (piece.Manager != null && piece.Manager.ActingPiece != piece) return;
+        if (ConsumeRefusal()) return;
+        // Rogue behavior is requested separately; normal decisions are not run per frame.
+        if (piece.control == Team.Player && IsRogue) return;
+        if (mageAgent != null) mageAgent.TakeTurn();
+        else
         {
-            return;
+            piece.Logic();
+            piece.Advance();
         }
-
-        if (IsRogue)
-        {
-            Debug.Log($"Piece {piece.name} did not follow its normal command because its morale is {morale}.", this);
-            return;
-        }
-
-        if (refuseNextCommand)
-        {
-            refuseNextCommand = false;
-            Debug.Log($"Piece {piece.name} refused its command.", this);
-            return;
-        }
-
-        piece.Advance();
     }
 
     /// <summary>
@@ -141,35 +154,48 @@ public class PieceMoraleAgent : MonoBehaviour
     /// </summary>
     public void OnPieceDestroy()
     {
-        if (piece == null)
+        if (piece != null && piece.Manager != null && piece.Manager.ActingPiece != null && piece.Manager.ActingPiece != piece)
         {
+            piece.Manager.CapturePiece(piece, piece.Manager.ActingPiece.control);
             return;
         }
-
-        Team capturedTeam = piece.control;
-        Debug.Log($"Piece {piece.name} was captured (team {capturedTeam}).", this);
-        PieceDestroyed?.Invoke(capturedTeam);
+        Debug.LogWarning("A capture requires a GameManager action and known capturing side.", this);
     }
 
-    private void HandlePieceDestroyed(Team capturedTeam)
+    public void OnPieceDestroy(CaptureEvent capture)
     {
-        if (piece == null || !piece.gameObject.activeInHierarchy || piece.health <= 0)
-        {
-            return;
-        }
+        if (captureNotified) return;
+        captureNotified = true;
+        PieceDestroyed -= HandlePieceDestroyed;
+        PublishCapture(capture);
+    }
+
+    public static void PublishCapture(CaptureEvent capture)
+    {
+        PieceDestroyed?.Invoke(capture);
+    }
+
+    private void HandlePieceDestroyed(CaptureEvent capture)
+    {
+        if (piece == null || !piece.gameObject.activeInHierarchy || piece.health <= 0 ||
+            piece.control != Team.Player || capture.PieceId == piece.PieceId) return;
 
         int previousMorale = morale;
-        morale += capturedTeam == piece.control
-            ? -moraleLostWhenAllyIsCaptured
-            : moraleGainedWhenEnemyIsCaptured;
+        int allyLost = moraleLostWhenAllyIsCaptured;
+        int enemyTaken = moraleGainedWhenEnemyIsCaptured;
+        foreach (CaptureWeight weight in captureWeights)
+            if (weight != null && weight.capturedType == capture.PieceType)
+            {
+                allyLost = weight.allyLost;
+                enemyTaken = weight.enemyTaken;
+                break;
+            }
+        morale += capture.CapturedTeam == piece.control ? -allyLost : enemyTaken;
         morale = Mathf.Clamp(morale, 0, 100);
-
-        if (morale >= recoverThreshold)
-        {
-            refuseNextCommand = false;
-        }
-
-        Debug.Log($"Morale updated for {piece.name}: {previousMorale} -> {morale} (captured {capturedTeam}).", this);
+        if (!isRogue && morale < rogueThreshold) isRogue = true;
+        else if (isRogue && morale >= recoverThreshold) isRogue = false;
+        if (!isRogue) refuseNextCommand = false;
+        Debug.Log($"turn={capture.Turn} piece={piece.name} id={piece.GetEntityId()} cause=capture type={capture.PieceType} side={capture.CapturedTeam} captor={capture.CapturingTeam} morale={previousMorale}->{morale} rogue={isRogue}", this);
     }
 
     private static bool IsReserved(BoardPos destination, BoardPos[] reservedTiles)

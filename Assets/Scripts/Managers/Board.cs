@@ -5,6 +5,8 @@ using System.Text;
 public class Board
 {
     private readonly Team[,] localView;
+    private readonly BoardPiece[,] occupants;
+    public readonly List<CaptureEvent> CaptureHistory = new List<CaptureEvent>();
 
     public readonly Dictionary<Team, List<BoardPiece>> capturedEachTeam = new Dictionary<Team, List<BoardPiece>>();
 
@@ -14,6 +16,50 @@ public class Board
     public Board(int width, int height)
     {
         localView = new Team[width, height];
+        occupants = new BoardPiece[width, height];
+    }
+
+    public bool Register(BoardPiece piece)
+    {
+        if (piece == null) return false;
+        BoardPos pos = piece.GetPos();
+        if (!IsInBounds(pos.X, pos.Y) || occupants[pos.X, pos.Y] != null || piece.control == Team.None) return false;
+        occupants[pos.X, pos.Y] = piece;
+        localView[pos.X, pos.Y] = piece.control;
+        return true;
+    }
+
+    public bool TryGetPosition(BoardPiece piece, out BoardPos pos)
+    {
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                if (occupants[x, y] == piece && piece != null)
+                {
+                    pos = new BoardPos(x, y, localView[x, y]);
+                    return true;
+                }
+        pos = new BoardPos(-1, -1, Team.None);
+        return false;
+    }
+
+    public void Remove(BoardPiece piece)
+    {
+        if (!TryGetPosition(piece, out BoardPos pos)) return;
+        occupants[pos.X, pos.Y] = null;
+        localView[pos.X, pos.Y] = Team.None;
+    }
+
+    public bool TryMove(BoardPiece piece, BoardPos destination)
+    {
+        if (!TryGetPosition(piece, out BoardPos source) || !IsLegal(destination)) return false;
+        if (Math.Abs(source.X - destination.X) > 1 || Math.Abs(source.Y - destination.Y) > 1) return false;
+        occupants[source.X, source.Y] = null;
+        localView[source.X, source.Y] = Team.None;
+        occupants[destination.X, destination.Y] = piece;
+        localView[destination.X, destination.Y] = piece.control;
+        piece.xLoc = destination.X + 1;
+        piece.yLoc = destination.Y + 1;
+        return true;
     }
 
     public Team this[int x, int y]
@@ -33,9 +79,9 @@ public class Board
             return;
         }
 
-        BoardPos pos = agent.GetPos();
-        if (IsInBounds(pos.X, pos.Y))
+        if (TryGetPosition(agent, out BoardPos pos) && team != Team.None)
         {
+            agent.control = team;
             localView[pos.X, pos.Y] = team;
         }
     }
@@ -160,5 +206,23 @@ public struct BoardPos
         int dx = X - other.X;
         int dy = Y - other.Y;
         return Math.Sqrt((dx * dx) + (dy * dy));
+    }
+}
+
+public readonly struct CaptureEvent
+{
+    public readonly int Turn;
+    public readonly string PieceId;
+    public readonly string PieceType;
+    public readonly Team CapturedTeam;
+    public readonly Team CapturingTeam;
+
+    public CaptureEvent(int turn, BoardPiece piece, Team captor)
+    {
+        Turn = turn;
+        PieceId = piece.PieceId;
+        PieceType = piece.GetType().Name;
+        CapturedTeam = piece.control;
+        CapturingTeam = captor;
     }
 }

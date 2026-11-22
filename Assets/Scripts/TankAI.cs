@@ -42,9 +42,10 @@ public class TankAI : BoardPiece
     // Called when it is the AI's turn
     public override void Advance()
     {
-
+        if (Manager != null && Manager.ActingPiece != this) { Manager.IssueOrder(this); return; }
+        Logic();
         // Find the square between the idenified weak ally
-        if (weakestAlly && weakestAlly)
+        if (weakestAlly != null && nearestEnemy != null)
         {
             int blockX = weakestAlly.GetX() + System.Math.Sign(nearestEnemy.GetX() - weakestAlly.GetX());
 

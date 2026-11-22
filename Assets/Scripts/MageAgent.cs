@@ -64,7 +64,7 @@ public sealed class MageAgent : MonoBehaviour
 
     private void Update()
     {
-        if (!autoAct || Time.time < nextActTime)
+        if (!autoAct || (mage != null && mage.Manager != null) || Time.time < nextActTime)
         {
             return;
         }
@@ -82,13 +82,18 @@ public sealed class MageAgent : MonoBehaviour
             return;
         }
 
+        if (mage.Manager != null && mage.Manager.ActingPiece != mage)
+        {
+            mage.Manager.IssueOrder(mage);
+            return;
+        }
         List<EnemyTarget> livingEnemies = GetLivingEnemies();
         if (livingEnemies.Count == 0)
         {
             return;
         }
 
-        BoardPiece[] boardPieces = FindObjectsByType<BoardPiece>(FindObjectsSortMode.None);
+        BoardPiece[] boardPieces = mage.Manager != null ? mage.Manager.pieces.ToArray() : BoardPiece.AllPieces.ToArray();
 
         EnemyTarget target = SelectTarget(livingEnemies);
         if (target == null)
@@ -122,6 +127,20 @@ public sealed class MageAgent : MonoBehaviour
     private List<EnemyTarget> GetLivingEnemies()
     {
         List<EnemyTarget> living = new List<EnemyTarget>();
+        if (mage.Manager != null)
+        {
+            foreach (BoardPiece candidate in mage.Manager.pieces)
+            {
+                if (candidate == null || candidate == mage || candidate.health <= 0 || !candidate.gameObject.activeInHierarchy ||
+                    candidate.control == mage.control || candidate.control == Team.None) continue;
+                TargetRole role = candidate is Healer_AI ? TargetRole.Healer : candidate is RangerPiece ? TargetRole.Ranger :
+                    candidate is TankAI ? TargetRole.Tank : candidate is Warrior ? TargetRole.Warrior : TargetRole.Other;
+                foreach (EnemyTarget configured in enemies)
+                    if (configured != null && configured.piece == candidate) { role = configured.role; break; }
+                living.Add(new EnemyTarget { piece = candidate, role = role });
+            }
+            return living;
+        }
         for (int i = enemies.Count - 1; i >= 0; i--)
         {
             EnemyTarget entry = enemies[i];
@@ -212,11 +231,16 @@ public sealed class MageAgent : MonoBehaviour
 
     private void CastSpell(BoardPiece target)
     {
+        if (mage.Manager != null)
+        {
+            mage.Manager.TryDamage(mage, target, spellDamage);
+            return;
+        }
         target.health = Mathf.Max(0, target.health - spellDamage);
         Debug.Log("Mage casts on " + target.name + "; target health is now " + target.health + ".", this);
-
         if (target.health == 0)
         {
+            PieceMoraleAgent.PublishCapture(new CaptureEvent(0, target, mage.control));
             target.gameObject.SetActive(false);
             Debug.Log("Mage defeated " + target.name + ".", this);
         }

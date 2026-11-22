@@ -10,21 +10,19 @@ public class Healer_AI : BoardPiece
 
     public override void Logic()
     {
-        allAllies = GameManager.instance.pieces;
-        if (control == Team.AI)
-        {
-            //reflexAction();
-        }
+        allAllies = Manager != null ? Manager.pieces : AllPieces;
     }
 
     public override void Advance()
     {
+        if (Manager != null && Manager.ActingPiece != this) { Manager.IssueOrder(this); return; }
+        Logic();
         BoardPiece weakest = null;
         int lowest = int.MaxValue;
 
         foreach (BoardPiece piece in allAllies)
         {
-            if (piece == null)
+            if (piece == null || piece.health <= 0 || !piece.gameObject.activeInHierarchy)
             {
                 continue;
             }
@@ -45,7 +43,8 @@ public class Healer_AI : BoardPiece
 
             if (distance <= 1)
             {
-                weakest.health += healAmount;
+                if (Manager != null) Manager.TryHeal(this, weakest, healAmount, maxHealth);
+                else weakest.health = Mathf.Min(maxHealth, weakest.health + healAmount);
             }
 
             else

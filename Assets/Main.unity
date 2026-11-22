@@ -3249,6 +3249,7 @@ GameObject:
   - component: {fileID: 607964083}
   - component: {fileID: 607964084}
   - component: {fileID: 607964085}
+  - component: {fileID: 607964086}
   m_Layer: 5
   m_Name: PlayerPiece
   m_TagString: Player
@@ -3367,6 +3368,27 @@ MonoBehaviour:
   targetPiece: {fileID: 0}
   xLoc: 4
   yLoc: 8
+  pieceId: Main/PlayerPiece/50ee7b1433174da9a781517ed9e62e64
+--- !u!114 &607964086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607964080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!224 &610106540 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5988374909143817986, guid: b2a312dd9c76eea429d828ef939cad41, type: 3}
@@ -4836,6 +4858,7 @@ GameObject:
   - component: {fileID: 1127666177}
   - component: {fileID: 1127666179}
   - component: {fileID: 1127666180}
+  - component: {fileID: 1127666181}
   m_Layer: 5
   m_Name: EnemyPieceRanger
   m_TagString: Untagged
@@ -4928,8 +4951,29 @@ MonoBehaviour:
   targetPiece: {fileID: 607964085}
   xLoc: 1
   yLoc: 2
+  pieceId: Main/EnemyPieceRanger/f788b94fef9e476fb686c1c98a1ff3da
   range: 4
   distance: 0
+--- !u!114 &1127666181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127666176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!224 &1128862074 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5988374909143817986, guid: b2a312dd9c76eea429d828ef939cad41, type: 3}
@@ -6168,6 +6212,7 @@ GameObject:
   - component: {fileID: 1427694796}
   - component: {fileID: 1427694795}
   - component: {fileID: 1427694797}
+  - component: {fileID: 1427694798}
   m_Layer: 5
   m_Name: EnemyPieceMage
   m_TagString: Untagged
@@ -6279,10 +6324,31 @@ MonoBehaviour:
   dmg: 1
   control: 2
   targetPiece: {fileID: 607964085}
-  xLoc: 0
-  yLoc: 0
+  xLoc: 1
+  yLoc: 1
+  pieceId: Main/EnemyPieceMage/b51219a0d4824a6e894cbeaff9a9751d
   range: 3
   distance: 0
+--- !u!114 &1427694798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1427694793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!1 &1471238666
 GameObject:
   m_ObjectHideFlags: 0
@@ -6294,6 +6360,7 @@ GameObject:
   - component: {fileID: 1471238667}
   - component: {fileID: 1471238669}
   - component: {fileID: 1471238668}
+  - component: {fileID: 1471238670}
   m_Layer: 5
   m_Name: EnemyPieceWarrior
   m_TagString: Untagged
@@ -6340,6 +6407,7 @@ MonoBehaviour:
   targetPiece: {fileID: 607964085}
   xLoc: 4
   yLoc: 4
+  pieceId: Main/EnemyPieceWarrior/be319638eca844558a23925a81116e96
   attackRange: 1
 --- !u!61 &1471238669
 BoxCollider2D:
@@ -6387,6 +6455,26 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 50, y: 50}
   m_EdgeRadius: 0
+--- !u!114 &1471238670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1471238666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!224 &1471633624 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1735522989475373378, guid: e7cb9de08e38d2642bec9dcdf8c62d5d, type: 3}
@@ -7513,6 +7601,7 @@ GameObject:
   - component: {fileID: 1674440191}
   - component: {fileID: 1674440193}
   - component: {fileID: 1674440192}
+  - component: {fileID: 1674440194}
   m_Layer: 5
   m_Name: EnemyPieceTank
   m_TagString: Untagged
@@ -7559,6 +7648,7 @@ MonoBehaviour:
   targetPiece: {fileID: 607964085}
   xLoc: 4
   yLoc: 3
+  pieceId: Main/EnemyPieceTank/65a729bac6834d1c886d89bdfc5bacd0
   protectedPiece: {fileID: 0}
   weakestAlly: {fileID: 0}
   nearestEnemy: {fileID: 0}
@@ -7608,6 +7698,26 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 50, y: 50}
   m_EdgeRadius: 0
+--- !u!114 &1674440194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674440190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!1001 &1676168093
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8376,6 +8486,7 @@ GameObject:
   - component: {fileID: 1877688404}
   - component: {fileID: 1877688406}
   - component: {fileID: 1877688405}
+  - component: {fileID: 1877688407}
   m_Layer: 5
   m_Name: EnemyPieceHealer
   m_TagString: Untagged
@@ -8421,7 +8532,8 @@ MonoBehaviour:
   control: 2
   targetPiece: {fileID: 0}
   xLoc: 4
-  yLoc: 0
+  yLoc: 1
+  pieceId: Main/EnemyPieceHealer/100690abeebc4d24a09d67e41ab277af
   healAmount: 2
   range: 2
   maxHealth: 10
@@ -8472,6 +8584,26 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 50, y: 50}
   m_EdgeRadius: 0
+--- !u!114 &1877688407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877688403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15d649c799e498f4cb42fa04892f3823, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceMoraleAgent
+  morale: 100
+  rogueThreshold: 40
+  recoverThreshold: 50
+  defectThreshold: 10
+  manicThreshold: 25
+  moraleLostWhenAllyIsCaptured: 10
+  moraleGainedWhenEnemyIsCaptured: 5
+  captureWeights: []
 --- !u!224 &1894041017 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1735522989475373378, guid: e7cb9de08e38d2642bec9dcdf8c62d5d, type: 3}
